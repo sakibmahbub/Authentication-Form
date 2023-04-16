@@ -1,10 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import app from "../../firebase/firebase.config";
 
+const auth = getAuth(app);
 const Register = () => {
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const handleSubmit = (event) => {
+    // 1. Prevent page refresh
     event.preventDefault();
+    setSuccess("");
+    // 2. Collect user data
     const email = event.target.email.value;
     const password = event.target.password.value;
+
+    // 3. Create User
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((result) => {
+        const loggedUser = result.user;
+        console.log(loggedUser);
+        setError("");
+        event.target.reset();
+        setSuccess("user has been created successfully");
+      })
+      .catch((error) => {
+        console.error(error.message);
+        setError(error.message);
+      });
   };
   return (
     <div className="mt-10">
@@ -16,6 +38,7 @@ const Register = () => {
           name="email"
           id="email"
           placeholder="email"
+          required
         />
         <br />
         <input
@@ -23,10 +46,13 @@ const Register = () => {
           type="password"
           name="password"
           id="password"
+          required
         />
         <br />
         <input className="btn btn-primary" type="submit" value="Register" />
       </form>
+      <p className="text-danger mt-5">{error}</p>
+      <p className="text-success mt-5">{success}</p>
     </div>
   );
 };
