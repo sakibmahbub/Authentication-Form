@@ -1,5 +1,9 @@
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
+import {
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import React, { useRef, useState } from "react";
 import app from "../../firebase/firebase.config";
 import { Link } from "react-router-dom";
 
@@ -7,6 +11,8 @@ const auth = getAuth(app);
 const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const emailRef = useRef();
+
   const handleSubmit = (event) => {
     // 1. Prevent page refresh
     event.preventDefault();
@@ -24,6 +30,23 @@ const Login = () => {
       })
       .catch((error) => setError(error.message));
   };
+
+  const handleEventPassword = (event) => {
+    const email = emailRef.current.value;
+    if (!email) {
+      alert("please provide your email address");
+      return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("please check your email");
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error.message);
+      });
+  };
   return (
     <div className="mt-10">
       <h4>Please Login</h4>
@@ -35,6 +58,7 @@ const Login = () => {
           id="email"
           placeholder="email"
           required
+          ref={emailRef}
         />
         <br />
         <input
@@ -47,6 +71,14 @@ const Login = () => {
         <br />
         <input className="btn btn-primary" type="submit" value="Login" />
       </form>
+      <p className="mt-3">
+        <small>
+          Forgot password? Please{" "}
+          <button className="btn btn-link" onClick={handleEventPassword}>
+            reset password
+          </button>
+        </small>
+      </p>
       <p>
         <small>
           New here? Please <Link to="/register">register</Link>
